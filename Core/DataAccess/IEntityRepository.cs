@@ -4,9 +4,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq.Expressions;
 using System.Text;
-using Entities.Abstract;
+using Core.Entities;
 
-namespace DataAccess.Abstract
+namespace Core.DataAccess
 {
     //generic constrait
     //where T:class -> referans tip olabilir anlamına gelir

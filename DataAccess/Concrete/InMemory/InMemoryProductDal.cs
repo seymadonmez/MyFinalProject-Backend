@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using DataAccess.Abstract;
 using Entities.Concrete;
+using Entities.DTOs;
 
 namespace DataAccess.Concrete.InMemory
 {
@@ -50,6 +51,11 @@ namespace DataAccess.Concrete.InMemory
             Product productToDelete = _products.SingleOrDefault(p=> p.ProductId==product.ProductId); // tek bir eleman bulmaya yarar. p tek tek dolaşırken verdiğimiz takma isim. yukarıdaki foreach in yaptığı işi yapar. her p için pnin productid'si product'ın productid'sine eşit mi diye bakar
             _products.Remove(productToDelete);
 
+        }
+
+        public List<ProductDetailDto> GetProductDetails()
+        {
+            throw new NotImplementedException();
         }
 
         public Product Get(Expression<Func<Product, bool>> filter)
