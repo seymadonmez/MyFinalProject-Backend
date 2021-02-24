@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using Business.Abstract;
+using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework;
@@ -13,16 +15,21 @@ using DataAccess.Concrete.InMemory;
 using Entities.Concrete;
 using Entities.DTOs;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Business.Concrete
 {
     public class ProductManager:IProductService
     {
-        private IProductDal _productDal;
+        IProductDal _productDal;
+        ICategoryService _categoryService;
+        
 
-        public ProductManager(IProductDal productDal)
+        public ProductManager(IProductDal productDal,ICategoryService categoryService)
         {
             _productDal = productDal;
+            _categoryService = categoryService;
+
         }
 
         public IDataResult<List<Product>> GetAll()
@@ -90,8 +97,69 @@ namespace Business.Concrete
             //transaction
             //yetkilendirme
 
+            //bir kategoride en fazla 10 ürün olabilir
+            // aynı isimde ürün eklenemez
+            // Eğer mevcut category sayısı 15'i geçtiyse sisteme yeni ürün eklenemez. mikroservis mimarilerine nasıl bakmamız gerektiğini öğreneceğiz
+            //business codes
+
+            IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
+                CheckIfProductNameExits(product.ProductName),CheckIfCategoryLimitExceded());
+            if (result != null)
+            {
+                return result;
+            }
             _productDal.Add(product);
             return new SuccessResult(Messages.ProductAdded);
+
+        }
+        [ValidationAspect(typeof(ProductValidator))]
+        public IResult Update(Product product)
+        {
+            IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
+                CheckIfProductNameExits(product.ProductName));
+            if (result!=null)
+            {
+                return result;
+            }
+            _productDal.Update(product);
+            return new SuccessResult();
+
+        }
+
+        private IResult CheckIfProductCountOfCategoryCorrect(int categoryId) // Product product da diyebilirdik
+        {
+            //GetAll(p=>p.CategoryId==categoryId) burası Select Count(*) From Products where categoryId=1  bunu çalıştırır. Tüm datayı çekip sonra filtreleme yapmaz
+            var result = _productDal.GetAll(p => p.CategoryId == categoryId).Count;
+            if (result >= 15)
+            {
+                return new ErrorResult(Messages.ProductCountOfCategoryError);
+            }
+            return new SuccessResult();
+        }
+        private IResult CheckIfProductNameExits(string productName) // Product product da diyebilirdik
+        {
+            //GetAll(p=>p.CategoryId==categoryId) burası Select Count(*) From Products where categoryId=1  bunu çalıştırır. Tüm datayı çekip sonra filtreleme yapmaz
+            var result = _productDal.GetAll(p => p.ProductName == productName).Any(); //any bu kurala uyan kayıt var mı demek
+            if (result)
+            {
+                return new ErrorResult(Messages.ProductNameAlreadyExists);
+            }
+
+            //var result2 = _productDal.GetAll(p => p.ProductName == productName);
+            //if (result!=null)
+            //{
+            //    return new ErrorResult(Messages.ProductNameAlreadyExists);
+            //}
+            return new SuccessResult();
+        }
+        private IResult CheckIfCategoryLimitExceded() // Product product da diyebilirdik
+        {
+            var result = _categoryService.GetAll();
+            if (result.Data.Count > 15)
+            {
+                return new ErrorResult(Messages.CategoryLimitExceded);
+            }
+            return new SuccessResult();
         }
     }
 }

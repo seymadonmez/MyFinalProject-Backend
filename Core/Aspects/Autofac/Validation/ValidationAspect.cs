@@ -9,11 +9,12 @@ using FluentValidation;
 
 namespace Core.Aspects.Autofac.Validation
 {
-    public class ValidationAspect : MethodInterception
+    public class ValidationAspect : MethodInterception //Aspect
     {
         private Type _validatorType;
         public ValidationAspect(Type validatorType)
         {
+            //defensive coding
             if (!typeof(IValidator).IsAssignableFrom(validatorType))
             {
                 throw new System.Exception("Bu bir doğrulama sınıfı değil");
@@ -21,10 +22,12 @@ namespace Core.Aspects.Autofac.Validation
 
             _validatorType = validatorType;
         }
+
+        //Doğrulama validation metodun başında yapılır o yüzden sadece onbefore yazdık
         protected override void OnBefore(IInvocation invocation)
         {
-            var validator = (IValidator)Activator.CreateInstance(_validatorType); //reflection->çalışma anında oluşturur
-            var entityType = _validatorType.BaseType.GetGenericArguments()[0];
+            var validator = (IValidator)Activator.CreateInstance(_validatorType); //reflection->çalışma anında oluşturur. productValidator'ü newler
+            var entityType = _validatorType.BaseType.GetGenericArguments()[0]; //productValidator'ın parametresi - yani product 
             var entities = invocation.Arguments.Where(t => t.GetType() == entityType);
             foreach (var entity in entities)
             {
