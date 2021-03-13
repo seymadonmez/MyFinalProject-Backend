@@ -85,13 +85,6 @@ namespace Business.Concrete
             //    return new ErrorResult(Messages.UnitPriceInvalid);
             //}
 
-            //if (product.ProductName.Length < 2)
-            //{
-            //    //magic string
-            //    return  new ErrorResult(Messages.ProductNameInvalid);
-            //}
-           
-
             //ValidationTool.Validate(new ProductValidator(), product);
             //loglama
             //cacheremove

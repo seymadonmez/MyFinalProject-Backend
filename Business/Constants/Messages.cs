@@ -13,9 +13,9 @@ namespace Business.Constants
         public static string MaintenanceTime = "Sistem bakımda";
         public static string ProductsListed="Ürünler listelendi";
         public static string ProductCountOfCategoryError="Bir kategoride en fazla 10 ürün olabilir!";
-        internal static string ProductNameAlreadyExists="Bu isimde zaten başka bir ürün bulunuyor.";
-        internal static string CategoryLimitExceded="Kategori limiti aşıldığı için yeni ürün eklenemiyor";
-        internal static string AuthorizationDenied= "Yetkiniz yok";
+        public static string ProductNameAlreadyExists ="Bu isimde zaten başka bir ürün bulunuyor.";
+        public static string CategoryLimitExceded ="Kategori limiti aşıldığı için yeni ürün eklenemiyor";
+        public static string AuthorizationDenied = "Yetkiniz yok";
 
         public static string UserNotFound = "Kullanıcı bulunamadı";
         public static string PasswordError = "Şifre hatalı";
