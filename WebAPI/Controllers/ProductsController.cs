@@ -49,7 +49,7 @@ namespace WebAPI.Controllers
             var result = _productService.GetById(id);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
             return BadRequest(result);
         }

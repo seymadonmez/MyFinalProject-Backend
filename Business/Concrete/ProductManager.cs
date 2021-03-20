@@ -6,6 +6,9 @@ using Business.BusinessAspects.Autofac;
 using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Performance;
+using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Business;
@@ -33,6 +36,8 @@ namespace Business.Concrete
 
         }
 
+        [CacheAspect]
+        //[SecuredOperation("product.list")]
         public IDataResult<List<Product>> GetAll()
         {
             // İş Kodları
@@ -48,7 +53,7 @@ namespace Business.Concrete
 
             //businesste in memory yok, entity yok sadece Iproductdal olmalı
         }
-
+        
         public IDataResult<List<Product>> GetAllByCategoryId(int id)
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.CategoryId == id)) ;
@@ -68,7 +73,8 @@ namespace Business.Concrete
 
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
         }
-
+        [CacheAspect]
+        [PerformanceAspect(5)] //bu metodun çalışması 5 sn'yi geçerse beni uyar, yani sistemde bir yavaşlık var
         public IDataResult<Product> GetById(int productId)
         {
             return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == productId));
@@ -76,6 +82,8 @@ namespace Business.Concrete
 
         [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
+        [TransactionScopeAspect]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
             //business codes
@@ -108,6 +116,7 @@ namespace Business.Concrete
 
         }
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")] //Iproductservice'teki tüm get'leri silsin update olduktan sonra
         public IResult Update(Product product)
         {
             IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
@@ -119,6 +128,11 @@ namespace Business.Concrete
             _productDal.Update(product);
             return new SuccessResult();
 
+        }
+
+        public IResult AddTransactionalTest(Product product)
+        {
+            throw new NotImplementedException();
         }
 
         private IResult CheckIfProductCountOfCategoryCorrect(int categoryId) // Product product da diyebilirdik
