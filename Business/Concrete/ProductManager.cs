@@ -79,7 +79,6 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == productId));
         }
-
         [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
         [TransactionScopeAspect]
@@ -105,8 +104,8 @@ namespace Business.Concrete
             // Eğer mevcut category sayısı 15'i geçtiyse sisteme yeni ürün eklenemez. mikroservis mimarilerine nasıl bakmamız gerektiğini öğreneceğiz
             //business codes
 
-            IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
-                CheckIfProductNameExits(product.ProductName),CheckIfCategoryLimitExceded());
+            IResult result = BusinessRules.Run(CheckIfProductNameExits(product.ProductName),
+                CheckIfProductCountOfCategoryCorrect(product.CategoryId), CheckIfCategoryLimitExceded());
             if (result != null)
             {
                 return result;

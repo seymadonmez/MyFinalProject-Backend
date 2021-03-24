@@ -77,8 +77,10 @@ namespace WebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.ConfigureCustomExceptionMiddleware();
             //sýrasý önemli burada 
             app.UseCors(builder=> builder.WithOrigins("http://localhost:4200").AllowAnyHeader()); //buradan istek gelirse izin ver demek, adresten get,post vs ne istek gelirse izin ver demek
+            app.UseCors(builder => builder.AllowAnyHeader().AllowAnyOrigin());
 
             //Asp.net yaþam dönüsünde hangi sýrayla çalýþacaðýný belirtiyoruz burada
             app.UseHttpsRedirection();
